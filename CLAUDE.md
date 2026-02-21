@@ -17,12 +17,12 @@ These rules govern how Claude Code operates from this central directory:
 | Symlink | Path | Purpose | CLAUDE.md | Build |
 |---------|------|---------|-----------|-------|
 | `mines/` | `/mnt/shared/Mines` | Minesweeper homebrew game (KN5000 port) | Yes | `cd mines/platforms/kn5000 && make` |
-| `roms-disasm/` | `~/devel/kn5000-roms-disasm` | ROM disassembly & byte-matching reconstruction | Yes (823 lines) | `cd roms-disasm && make all` |
+| `roms-disasm/` | `/mnt/shared/kn5000-roms-disasm` | ROM disassembly & byte-matching reconstruction | Yes (823 lines) | `cd roms-disasm && make all` |
 | `llvm/` | `/mnt/shared/llvm-project` | Custom LLVM with TLCS-900 backend | Yes | `cd llvm && ninja -Cbuild` (user builds) |
 | `mame/` | `/mnt/shared/mame` | MAME emulator (KN5000 driver development) | Yes (1 line) | User builds externally |
-| `sound/` | `~/devel/kn5000_sound_subsystem` | Sound subsystem RE & MAME driver fixes | Yes | Edit in `mame/src/mame/matsushita/` |
-| `custom-roms/` | `~/devel/custom-kn5000-roms` | Custom ROM experiments (Another World port) | Yes | `cd custom-roms/anotherworld && make` |
-| `docs/` | `~/devel/kn5000-docs` | Documentation website (Jekyll) | Yes | `cd docs && bundle exec jekyll serve` |
+| `sound/` | `/mnt/shared/kn5000_sound_subsystem` | Sound subsystem RE & MAME driver fixes | Yes | Edit in `mame/src/mame/matsushita/` |
+| `custom-roms/` | `/mnt/shared/custom-kn5000-roms` | Custom ROM experiments (Another World port) | Yes | `cd custom-roms/anotherworld && make` |
+| `docs/` | `/mnt/shared/kn5000-docs` | Documentation website (Jekyll) | Yes | `cd docs && bundle exec jekyll serve` |
 | `original-roms/` | `/mnt/shared/kn5000_original_roms` | Original firmware ROM dumps | No | N/A (read-only reference) |
 
 ### Additional Paths (no symlink)
@@ -30,7 +30,7 @@ These rules govern how Claude Code operates from this central directory:
 | Path | Purpose |
 |------|---------|
 | `/mnt/shared/custom_kn5000_roms` | Modified ROM data for MAME testing |
-| `~/devel/tools/` | Shared tools (`asl/`, `bd`, `unidasm`) |
+| `/mnt/shared/tools/` | Shared tools (`asl/`, `bd`, `unidasm`) |
 
 ## Cross-Project Policies
 
@@ -84,7 +84,7 @@ Agents may build LLVM using `ninja -Cbuild` in the LLVM directory. Reconfigure w
 ### Issue Tracker Discipline (STRICT POLICY)
 **Source:** Central hub (this file) — applies to ALL subprojects.
 
-Project issues are tracked using [Beads](https://github.com/beads-ai/beads) in `roms-disasm/.beads/issues.jsonl`. The `bd` CLI is at `~/devel/tools/bd`. **NEVER edit `issues.jsonl` directly** — always use `bd` commands.
+Project issues are tracked using [Beads](https://github.com/beads-ai/beads) in `.beads/issues.jsonl` (in this directory). The `bd` CLI is at `/mnt/shared/tools/bd`. **NEVER edit `issues.jsonl` directly** — always use `bd` commands.
 
 **Issue-First Workflow (MANDATORY):**
 When the user reports a bug or requests a task, the agent MUST:
@@ -102,8 +102,8 @@ When an agent starts working on an issue, it MUST immediately add a comment like
 
 **Quick reference:**
 ```bash
-BD=~/devel/tools/bd
-cd ~/devel/kn5000-roms-disasm  # bd must run from this directory
+BD=/mnt/shared/tools/bd
+cd /mnt/shared/kn5000_project  # bd must run from this directory
 $BD list                       # List all issues
 $BD show <id>                  # Show issue details
 $BD create "title"             # Create new issue
@@ -156,7 +156,7 @@ See `mines/` memory files for full bug documentation and workaround details.
 
 ## How to Work From Here
 
-1. **Check the issue tracker.** Run `cd ~/devel/kn5000-roms-disasm && ~/devel/tools/bd ready` to see available work, or `bd list` for all issues.
+1. **Check the issue tracker.** Run `cd /mnt/shared/kn5000_project && /mnt/shared/tools/bd ready` to see available work, or `bd list` for all issues.
 2. **Identify the subproject.** What does the task involve? ROM disassembly? MAME driver? Homebrew game? LLVM compiler? Documentation?
 3. **Read the CLAUDE.md.** Navigate to the subproject (use symlinks) and read its CLAUDE.md before making any changes.
 4. **Check memories.** If the task involves accumulated knowledge (bug workarounds, hardware findings, API patterns), check the relevant subproject memory.
