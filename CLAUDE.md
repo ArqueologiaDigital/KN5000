@@ -76,10 +76,10 @@ Edit MAME driver files in `/mnt/shared/mame/src/mame/matsushita/`. Do not create
 
 All emulator code must describe actual hardware behavior. No HLE shortcuts when ROM dumps are available. HLE is acceptable ONLY for undumped MCU ROMs (control panel MCU, LED controller).
 
-### LLVM: Never Build
+### LLVM: Build Allowed
 **Source:** `llvm/CLAUDE.md`
 
-The user builds LLVM manually. Never run `ninja` or `cmake` in the LLVM directory.
+Agents may build LLVM using `ninja -Cbuild` in the LLVM directory. Reconfigure with `bash build_tlcs900.sh` only if needed. Run specific targets (e.g., `ninja -Cbuild llc`) for faster incremental builds. Run tests with `build/bin/llvm-lit llvm/test/CodeGen/TLCS900/`.
 
 ### Issue Tracker Discipline (STRICT POLICY)
 **Source:** Central hub (this file) — applies to ALL subprojects.
@@ -91,6 +91,9 @@ When the user reports a bug or requests a task, the agent MUST:
 1. **Register it in Beads first** — create an issue with `bd create` before starting any work.
 2. **Then work on it** — fix the bug, plan, or execute the task.
 3. If the user gives multiple bugs/tasks at once, register each as a **separate issue**, pick the most important (or viable) one to work on first, and resume the others later by reading them from the tracker.
+
+**Claim/Release Issues (MANDATORY — prevents duplicate work):**
+When an agent starts working on an issue, it MUST immediately add a comment like `CLAIMED: Starting work on this issue.` When it stops working (finished, blocked, or moving to another task), it MUST add a comment like `RELEASED: <reason>.` Before picking up an issue, check its comments — if another agent has a `CLAIMED` without a subsequent `RELEASED`, do NOT work on that issue. This prevents multiple concurrent agents from duplicating effort on the same issue.
 
 **At the end of any meaningful work, agents MUST:**
 1. **Update the issue tracker** — add progress comments to relevant issues, close completed issues (following Issue Closure Requirements in `roms-disasm/CLAUDE.md`), and open new issues for any additional work identified.
