@@ -2,20 +2,24 @@
 
 Reverse engineering and homebrew development for the **Technics KN5000** arranger keyboard.
 
-## What's Here
+**Website:** [arqueologiadigital.github.io/kn5000-docs](https://arqueologiadigital.github.io/kn5000-docs/) — hardware docs, memory maps, progress tracking
 
-This repository is the central hub for a multi-pronged effort spanning ROM disassembly, emulation, compiler development, homebrew games, and documentation.
+**Discussion:** [Technics KN5000 Homebrew Development](https://forum.fiozera.com.br/t/technics-kn5000-homebrew-development/321) on the Fiozera forum
 
-| Directory | Description |
-|-----------|-------------|
-| `roms-disasm/` | ROM disassembly & byte-matching reconstruction |
-| `mame/` | MAME emulator — KN5000 driver development |
-| `llvm/` | Custom LLVM backend for the TLCS-900 CPU |
-| `mines/` | Minesweeper homebrew game (KN5000 port) |
-| `custom-roms/` | Custom ROM experiments (Another World port) |
-| `sound/` | Sound subsystem reverse engineering |
-| `docs/` | [Documentation website](https://arqueologiadigital.github.io/kn5000-docs/) (Jekyll) |
-| `original-roms/` | Original firmware ROM dumps (read-only reference) |
+## Subprojects
+
+This repository is the central hub aggregating all related work. Each subproject lives in its own git repository:
+
+| Directory | Repository | Description |
+|-----------|------------|-------------|
+| `roms-disasm/` | [kn5000-roms-disasm](https://github.com/ArqueologiaDigital/kn5000-roms-disasm) | ROM disassembly & byte-matching reconstruction |
+| `mame/` | [mame](https://github.com/felipesanches/mame) | MAME emulator — KN5000 driver development |
+| `llvm/` | [llvm-project](https://github.com/felipesanches/llvm-project) | Custom LLVM backend for the TLCS-900 CPU |
+| `mines/` | [Mines](https://github.com/ArqueologiaDigital/Mines) | Minesweeper homebrew game (KN5000 port) |
+| `custom-roms/` | [custom-kn5000-roms](https://github.com/ArqueologiaDigital/custom-kn5000-roms) | Custom ROM experiments (Another World port) |
+| `sound/` | — | Sound subsystem reverse engineering |
+| `docs/` | [KN5000-docs](https://github.com/ArqueologiaDigital/KN5000-docs) | Documentation website (Jekyll) |
+| `original-roms/` | — | Original firmware ROM dumps (read-only reference) |
 
 ## Target Hardware
 
