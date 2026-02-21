@@ -17,7 +17,6 @@ This repository is the central hub aggregating all related work. Each subproject
 | `llvm/` | [llvm-project](https://github.com/felipesanches/llvm-project) | Custom LLVM backend for the TLCS-900 CPU |
 | `mines/` | [Mines](https://github.com/ArqueologiaDigital/Mines) | Minesweeper homebrew game (KN5000 port) |
 | `custom-roms/` | [custom-kn5000-roms](https://github.com/ArqueologiaDigital/custom-kn5000-roms) | Custom ROM experiments (Another World port) |
-| `sound/` | — | Sound subsystem reverse engineering |
 | `docs/` | [KN5000-docs](https://github.com/ArqueologiaDigital/KN5000-docs) | Documentation website (Jekyll) |
 | `original-roms/` | — | Original firmware ROM dumps (read-only reference) |
 
