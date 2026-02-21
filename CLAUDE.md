@@ -1,6 +1,6 @@
 # KN5000 Project — Central Hub
 
-This directory is the unified entry point for the Technics KN5000 reverse engineering and homebrew project. It aggregates 8 subprojects spanning ROM disassembly, MAME emulation, LLVM compiler development, homebrew games, and documentation.
+This directory is the unified entry point for the Technics KN5000 reverse engineering and homebrew project. It aggregates 7 subprojects spanning ROM disassembly, MAME emulation, LLVM compiler development, homebrew games, and documentation.
 
 ## Meta-Rules (MANDATORY)
 
@@ -20,7 +20,6 @@ These rules govern how Claude Code operates from this central directory:
 | `roms-disasm/` | `/mnt/shared/kn5000-roms-disasm` | ROM disassembly & byte-matching reconstruction | Yes (823 lines) | `cd roms-disasm && make all` |
 | `llvm/` | `/mnt/shared/llvm-project` | Custom LLVM with TLCS-900 backend | Yes | `cd llvm && ninja -Cbuild` (user builds) |
 | `mame/` | `/mnt/shared/mame` | MAME emulator (KN5000 driver development) | Yes (1 line) | User builds externally |
-| `sound/` | `/mnt/shared/kn5000_sound_subsystem` | Sound subsystem RE & MAME driver fixes | Yes | Edit in `mame/src/mame/matsushita/` |
 | `custom-roms/` | `/mnt/shared/custom-kn5000-roms` | Custom ROM experiments (Another World port) | Yes | `cd custom-roms/anotherworld && make` |
 | `docs/` | `/mnt/shared/kn5000-docs` | Documentation website (Jekyll) | Yes | `cd docs && bundle exec jekyll serve` |
 | `original-roms/` | `/mnt/shared/kn5000_original_roms` | Original firmware ROM dumps | No | N/A (read-only reference) |
@@ -37,17 +36,17 @@ These rules govern how Claude Code operates from this central directory:
 These policies originate from specific subprojects but apply globally. The canonical definition lives in the listed CLAUDE.md.
 
 ### Frequent Commits & Clean Working Directory
-**Source:** `roms-disasm/CLAUDE.md`, `sound/CLAUDE.md`
+**Source:** `roms-disasm/CLAUDE.md`
 
 Commit immediately after each logical change. Never leave uncommitted work. `git status` should always show a clean tree. Applies to ALL repos.
 
 ### No AI Attribution on MAME PR Branches
-**Source:** `sound/CLAUDE.md`
+**Source:** `mame/CLAUDE.md`
 
 Do NOT include "Co-Authored-By: Claude" in commits on `kn5000_pr*` branches (destined for upstream MAME PRs). All other repos/branches SHOULD include the attribution as usual.
 
 ### Assembly Edit Verification
-**Source:** `sound/CLAUDE.md`, `roms-disasm/CLAUDE.md`
+**Source:** `roms-disasm/CLAUDE.md`
 
 Every assembly edit must be verified: (1) ROMs still build, (2) byte-matching score does not degrade (`python scripts/compare_roms.py`). Never commit assembly changes without both checks passing.
 
@@ -67,7 +66,7 @@ When firmware understanding improves (new event codes, dispatch behavior, handle
 All policies MUST be saved in CLAUDE.md files (not just memory). CLAUDE.md is the canonical, version-controlled source of truth. Use progressive disclosure: concise summaries at top level, details in sub-sections.
 
 ### MAME Driver Edits
-**Source:** `sound/CLAUDE.md`
+**Source:** `mame/CLAUDE.md`
 
 Edit MAME driver files in `/mnt/shared/mame/src/mame/matsushita/`. Do not create copies elsewhere. User builds MAME manually.
 
