@@ -70,6 +70,13 @@ All policies MUST be saved in CLAUDE.md files (not just memory). CLAUDE.md is th
 
 Edit MAME driver files in `/mnt/shared/mame/src/mame/matsushita/`. Do not create copies elsewhere. User builds MAME manually.
 
+### MAME Code Style (for upstream PR branches)
+**Source:** Central hub (this file) — applies to `kn5000_pr*` branches.
+
+- Use `BIT(value, bit)` instead of `(value & (1 << bit))` for single-bit tests.
+- Use `logmacro.h` with categorized `LOGMASKED()` channels instead of raw `logerror()`.
+- Follow existing MAME coding conventions visible in surrounding code.
+
 ### Accurate Hardware Emulation
 **Source:** `roms-disasm/CLAUDE.md`
 
