@@ -153,9 +153,9 @@ This policy ensures the issue tracker is the single source of truth for project 
 - Display subsystem: `docs/display-subsystem.md`
 - ROM reconstruction progress: `docs/rom-reconstruction.md`
 
-### LLVM TLCS-900 Backend Bugs (Active)
-One bug requires a C-level workaround in homebrew code:
-- **Bug #10:** Register x/y swap on inlining — use `__attribute__((noinline))`
+### LLVM TLCS-900 Backend Bugs
+No active bugs. All previously reported bugs have been fixed or resolved:
+- ~~**Bug #10:**~~ **NOT REPRODUCIBLE** (Feb 28): Original analysis used wrong register-parameter mapping. Code generation is correct with XDE-first calling convention. `__attribute__((noinline))` workaround can be removed.
 - ~~**Bug #11:**~~ **FIXED** (Feb 28, commit `eba2fe6622ee`): EXTS/EXTZ were incorrectly declared as flag-setting; workaround no longer needed.
 
 See `mines/` memory files for full bug documentation and workaround details.
