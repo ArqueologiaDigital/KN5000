@@ -154,11 +154,33 @@ This policy ensures the issue tracker is the single source of truth for project 
 - ROM reconstruction progress: `docs/rom-reconstruction.md`
 
 ### LLVM TLCS-900 Backend Bugs
-No active bugs. All previously reported bugs have been fixed or resolved:
-- ~~**Bug #10:**~~ **NOT REPRODUCIBLE** (Feb 28): Original analysis used wrong register-parameter mapping. Code generation is correct with XDE-first calling convention. `__attribute__((noinline))` workaround can be removed.
-- ~~**Bug #11:**~~ **FIXED** (Feb 28, commit `eba2fe6622ee`): EXTS/EXTZ were incorrectly declared as flag-setting; workaround no longer needed.
+No active bugs. All previously reported bugs have been fixed or resolved. All C-level workarounds have been removed from the Mines codebase (commit `8b1d85e`).
 
-See `mines/` memory files for full bug documentation and workaround details.
+See `mines/` memory files for full bug documentation.
+
+### MAME Automated Testing (STRICT POLICY)
+When running MAME automatically (without user interaction), you MUST skip startup dialogs to prevent the emulator from blocking on "press any key" screens:
+
+```bash
+# Skip ALL startup dialogs (system info + emulation warnings):
+mame kn5000 ... -skip_gameinfo -seconds_to_run 120 -nothrottle
+
+# For Mines game testing with Lua screenshot:
+mame kn5000 -rompath /mnt/shared/custom_kn5000_roms/mines \
+  -extension hdae5000 -window -skip_gameinfo \
+  -seconds_to_run 120 -nothrottle \
+  -autoboot_script /tmp/mame_screenshot.lua
+```
+
+**How it works:**
+- `-skip_gameinfo` skips the system information screen
+- `-seconds_to_run N` (where N < 300) skips ALL dialogs including severe emulation warnings. MAME exits after N emulated seconds.
+- `-nothrottle` runs emulation at maximum speed (no frame rate cap)
+- `-skip_warnings` (requires `skip_warnings 1` in `~/.mame/ui.ini` AND a local MAME patch in `ui.cpp`) skips warnings without requiring `-seconds_to_run`
+
+**Local MAME patch (NOT for upstream PRs):** In `src/frontend/mame/ui/ui.cpp`, `display_startup_screens()`, change `bool show_warnings = true;` to `bool show_warnings = !options().skip_warnings();`. This makes `-skip_warnings` work for all warning types including severe "THIS SYSTEM DOESN'T WORK" warnings.
+
+**Mines game activation:** The game requires DISK MENU activation (event `0x01C00008`). For automated tests, use Lua to write 1 to `GAME_ACTIVE` at address 0x200000 after the firmware has booted (~30s of emulated time).
 
 ## How to Work From Here
 
