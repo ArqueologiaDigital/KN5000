@@ -154,9 +154,9 @@ This policy ensures the issue tracker is the single source of truth for project 
 - ROM reconstruction progress: `docs/rom-reconstruction.md`
 
 ### LLVM TLCS-900 Backend Bugs (Active)
-Two bugs require C-level workarounds in homebrew code:
+One bug requires a C-level workaround in homebrew code:
 - **Bug #10:** Register x/y swap on inlining — use `__attribute__((noinline))`
-- **Bug #11:** for-loop with uint16_t counter exits after 1 iteration — use do-while + uint32_t
+- ~~**Bug #11:**~~ **FIXED** (Feb 28, commit `eba2fe6622ee`): EXTS/EXTZ were incorrectly declared as flag-setting; workaround no longer needed.
 
 See `mines/` memory files for full bug documentation and workaround details.
 
