@@ -1,0 +1,10 @@
+# MAME runtime artifacts
+nvram/
+snap/
+cfg/
+error.log
+mame_run.log
+test_fix.png
+
+# AI Agents temp files
+AI_Agents_TODO.txt
