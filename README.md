@@ -33,14 +33,14 @@ This repository is the central hub aggregating all related work. Each subproject
 An onboarding script clones all repositories, installs Claude Code memory files (accumulated project knowledge), and verifies the toolchain:
 
 ```bash
-# 1. Clone this hub repo
-git clone https://github.com/ArqueologiaDigital/KN5000.git /mnt/shared/kn5000_project
+# 1. Clone this hub repo (pick any directory you like)
+git clone https://github.com/ArqueologiaDigital/KN5000.git ~/kn5000/kn5000_project
 
 # 2. Run the onboarding script (clones all subproject repos + sets up context)
-bash /mnt/shared/kn5000_project/scripts/onboard.sh /mnt/shared
+bash ~/kn5000/kn5000_project/scripts/onboard.sh ~/kn5000
 ```
 
-The script is idempotent — run it again anytime to pull updates and refresh memory files.
+Replace `~/kn5000` with any directory. The script is idempotent — run it again anytime to pull updates and refresh memory files.
 
 ### What the onboarding script does
 

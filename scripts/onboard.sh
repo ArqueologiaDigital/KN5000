@@ -19,28 +19,29 @@ set -euo pipefail
 # ---------- Configuration ----------
 
 TARGET="${1:-/mnt/shared}"
-GITHUB_ORG="ArqueologiaDigital"
 
-# Repository map: local_dir -> github_repo
+# Repository map: local_dir -> full git clone URL
 declare -A REPOS=(
-  [kn5000_project]="kn5000_project"
-  [kn5000-roms-disasm]="kn5000-roms-disasm"
-  [llvm-project]="llvm-project"
-  [mame]="mame"
-  [Mines]="Mines"
-  [custom-kn5000-roms]="custom-kn5000-roms"
-  [kn5000-docs]="kn5000-docs"
+  [kn5000_project]="https://github.com/ArqueologiaDigital/KN5000.git"
+  [kn5000-roms-disasm]="https://github.com/ArqueologiaDigital/kn5000-roms-disasm.git"
+  [llvm-project]="https://github.com/felipesanches/llvm-project.git"
+  [mame]="https://github.com/felipesanches/mame.git"
+  [Mines]="https://github.com/ArqueologiaDigital/Mines.git"
+  [custom-kn5000-roms]="https://github.com/ArqueologiaDigital/custom-kn5000-roms.git"
+  [kn5000-docs]="https://github.com/ArqueologiaDigital/KN5000-docs.git"
 )
 
-# Memory file map: repo_dir -> claude_projects_key
-# The key is how Claude Code encodes the working directory into
-# ~/.claude/projects/<key>/memory/
-declare -A MEMORY_KEYS=(
-  [kn5000_project]="-mnt-shared-kn5000-project"
-  [Mines]="-mnt-shared-Mines"
-  [llvm-project]="-mnt-shared-llvm-project"
-  [custom-kn5000-roms]="-mnt-shared-custom-kn5000-roms"
-)
+# Repos that have .claude/memory/ files to install
+MEMORY_REPOS=(kn5000_project Mines llvm-project custom-kn5000-roms)
+
+# Claude Code encodes working directories into ~/.claude/projects/<key>/memory/
+# by replacing "/" with "-" in the absolute path.
+# E.g. /mnt/shared/Mines -> -mnt-shared-Mines
+path_to_claude_key() {
+  local abs_path
+  abs_path="$(cd "$1" 2>/dev/null && pwd -P)" || abs_path="$1"
+  echo "$abs_path" | sed 's|/|-|g'
+}
 
 # ---------- Colors ----------
 
@@ -71,14 +72,14 @@ info "Step 1: Cloning repositories..."
 echo ""
 
 for dir in "${!REPOS[@]}"; do
-  repo="${REPOS[$dir]}"
+  url="${REPOS[$dir]}"
   dest="$TARGET/$dir"
   if [ -d "$dest/.git" ] || [ -f "$dest/.git" ]; then
     ok "$dir — already cloned, pulling latest..."
     (cd "$dest" && git pull --ff-only 2>/dev/null) || warn "$dir — pull failed (might have local changes)"
   else
-    info "Cloning $repo..."
-    git clone "https://github.com/$GITHUB_ORG/$repo.git" "$dest"
+    info "Cloning $dir..."
+    git clone "$url" "$dest"
     ok "$dir — cloned"
   fi
 done
@@ -151,14 +152,16 @@ install_memory() {
   fi
 }
 
-for dir in "${!MEMORY_KEYS[@]}"; do
-  install_memory "$dir" "${MEMORY_KEYS[$dir]}"
+for dir in "${MEMORY_REPOS[@]}"; do
+  claude_key="$(path_to_claude_key "$TARGET/$dir")"
+  install_memory "$dir" "$claude_key"
 done
 
 # Handle the special case: Another World subproject has its own memory
 # stored under custom-kn5000-roms/anotherworld/.claude/memory/
 AW_SRC="$TARGET/custom-kn5000-roms/anotherworld/.claude/memory"
-AW_DEST="$CLAUDE_DIR/-mnt-shared-custom-kn5000-roms-anotherworld/memory"
+AW_KEY="$(path_to_claude_key "$TARGET/custom-kn5000-roms/anotherworld")"
+AW_DEST="$CLAUDE_DIR/$AW_KEY/memory"
 if [ -d "$AW_SRC" ]; then
   mkdir -p "$AW_DEST"
   cp "$AW_SRC"/*.md "$AW_DEST/" 2>/dev/null && \
