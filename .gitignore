@@ -6,5 +6,9 @@ error.log
 mame_run.log
 test_fix.png
 
+# Floppy disk images (large binary files)
+*.img
+*.mfi
+
 # AI Agents temp files
 AI_Agents_TODO.txt
