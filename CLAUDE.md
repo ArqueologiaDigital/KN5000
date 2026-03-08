@@ -87,6 +87,17 @@ All emulator code must describe actual hardware behavior. No HLE shortcuts when 
 
 Agents may build LLVM using `ninja -Cbuild` in the LLVM directory. Reconfigure with `bash build_tlcs900.sh` only if needed. Run specific targets (e.g., `ninja -Cbuild llc`) for faster incremental builds. Run tests with `build/bin/llvm-lit llvm/test/CodeGen/TLCS900/`.
 
+### Proactive Unblocking (STRICT POLICY)
+**Source:** Central hub (this file) — applies to ALL subprojects.
+
+Be proactive and come up with new tasks to unlock blocked issues. Thoroughly work on them all. Make significant progress even if it means untying knots independently. When an issue is blocked:
+1. **Identify the blocker** — read the dependency chain (`bd show <id>`, `bd blocked`).
+2. **Create unblocking tasks** — if no issue exists for the blocker, create one with `bd create`.
+3. **Work the blocker first** — resolve it, then return to the originally blocked issue.
+4. **Chain unblocking** — if the blocker is itself blocked, recurse until you find actionable work.
+
+Do not wait for user input to unblock issues. Do not report "this is blocked" without attempting to resolve the blocker. The goal is forward progress on every front.
+
 ### Issue Tracker Discipline (STRICT POLICY)
 **Source:** Central hub (this file) — applies to ALL subprojects.
 
