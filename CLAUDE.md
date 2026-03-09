@@ -174,20 +174,21 @@ When running MAME automatically (without user interaction), you MUST skip startu
 
 ```bash
 # Skip ALL startup dialogs (system info + emulation warnings):
-mame kn5000 ... -skip_gameinfo -seconds_to_run 120 -nothrottle
+mame kn5000 ... -skip_gameinfo -seconds_to_run 120
 
 # For Mines game testing with Lua screenshot:
 mame kn5000 -rompath /mnt/shared/custom_kn5000_roms/mines \
   -extension hdae5000 -window -skip_gameinfo \
-  -seconds_to_run 120 -nothrottle \
+  -seconds_to_run 120 \
   -autoboot_script /tmp/mame_screenshot.lua
 ```
 
 **How it works:**
 - `-skip_gameinfo` skips the system information screen
 - `-seconds_to_run N` (where N < 300) skips ALL dialogs including severe emulation warnings. MAME exits after N emulated seconds.
-- `-nothrottle` runs emulation at maximum speed (no frame rate cap)
 - `-skip_warnings` (requires `skip_warnings 1` in `~/.mame/ui.ini` AND a local MAME patch in `ui.cpp`) skips warnings without requiring `-seconds_to_run`
+
+**NEVER use `-nothrottle` (STRICT POLICY):** Running at accelerated speed can cause timing-dependent firmware issues. Always run MAME at real-time speed for accurate emulation behavior.
 
 **Local MAME patch (NOT for upstream PRs):** In `src/frontend/mame/ui/ui.cpp`, `display_startup_screens()`, change `bool show_warnings = true;` to `bool show_warnings = !options().skip_warnings();`. This makes `-skip_warnings` work for all warning types including severe "THIS SYSTEM DOESN'T WORK" warnings.
 
