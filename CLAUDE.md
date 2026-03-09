@@ -19,7 +19,7 @@ These rules govern how Claude Code operates from this central directory:
 | `mines/` | `/mnt/shared/Mines` | Minesweeper homebrew game (KN5000 port) | Yes | `cd mines/platforms/kn5000 && make` |
 | `roms-disasm/` | `/mnt/shared/kn5000-roms-disasm` | ROM disassembly & byte-matching reconstruction | Yes (823 lines) | `cd roms-disasm && make all` |
 | `llvm/` | `/mnt/shared/llvm-project` | Custom LLVM with TLCS-900 backend | Yes | `cd llvm && ninja -Cbuild` (user builds) |
-| `mame/` | `/mnt/shared/mame` | MAME emulator (KN5000 driver development) | Yes (1 line) | User builds externally |
+| `mame/` | `/mnt/shared/mame` | MAME emulator (KN5000 driver development) | Yes | `cd mame && make -j$(nproc) SOURCES=src/mame/matsushita/kn5000.cpp` |
 | `custom-roms/` | `/mnt/shared/custom-kn5000-roms` | Custom ROM experiments (Another World port) | Yes | `cd custom-roms/anotherworld && make` |
 | `docs/` | `/mnt/shared/kn5000-docs` | Documentation website (Jekyll) | Yes | `cd docs && bundle exec jekyll serve` |
 | `original-roms/` | `/mnt/shared/kn5000_original_roms` | Original firmware ROM dumps | No | N/A (read-only reference) |
@@ -68,7 +68,7 @@ All policies MUST be saved in CLAUDE.md files (not just memory). CLAUDE.md is th
 ### MAME Driver Edits
 **Source:** `mame/CLAUDE.md`
 
-Edit MAME driver files in `/mnt/shared/mame/src/mame/matsushita/`. Do not create copies elsewhere. User builds MAME manually.
+Edit MAME driver files in `/mnt/shared/mame/src/mame/matsushita/`. Do not create copies elsewhere. Agents may build MAME using `make -j$(nproc) SOURCES=src/mame/matsushita/kn5000.cpp` for incremental builds.
 
 ### MAME Code Style (for upstream PR branches)
 **Source:** Central hub (this file) — applies to `kn5000_pr*` branches.
