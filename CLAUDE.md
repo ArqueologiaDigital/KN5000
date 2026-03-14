@@ -288,14 +288,18 @@ Before launching parallel agents, the orchestrating agent must assign non-overla
 
 **Incident:** Multiple agents modifying the same cross-reference files concurrently caused changes to conflict or be silently overwritten.
 
-### Policy 7: Duplicate Symbol Detection in Rename Scripts
+### Policy 7: Duplicate Symbol Detection and Semantic Disambiguation
 
 Every rename mapping must be validated before application:
 1. All new names must be unique within the mapping
 2. All new names must not already exist as labels anywhere in the codebase (`grep -r "^new_name:" maincpu/`)
-3. If a collision is detected, append a disambiguating suffix (e.g., `_Inner`, `_Alt`, `_2`) rather than silently creating a duplicate
+3. If a collision is detected, do NOT use generic suffixes (`_2`, `_Alt`, `_Inner`). Instead, analyze the code at both addresses to understand what makes them semantically different, then choose names that reflect the actual distinction. Examples:
+   - Two routines both doing "read param" but from different sources → `SeqData_ReadParamFromBuffer` / `SeqData_ReadParamFromDRAM`
+   - Two entry points into the same logical operation → `FlashWrite_Start` / `FlashWrite_Resume`
+   - A function and its inlined variant → `VoiceScan_Loop` / `VoiceScan_Unrolled`
+4. If the semantic difference is genuinely unclear after analysis, leave the colliding label as `LABEL_XXXXXX` rather than assigning a misleading name. A raw address label is better than a wrong semantic name.
 
-**Incident:** 4 fix commits were needed for duplicate symbol names — two different `LABEL_XXXXXX` addresses renamed to the same semantic name.
+**Incident:** 4 fix commits were needed for duplicate symbol names — two different `LABEL_XXXXXX` addresses renamed to the same semantic name (`SeqData_ReadParamReturn`, `AudioCtrl_Epilogue`, `SeqScan_ProcessAllParts`).
 
 ### Policy 8: Agent Progress Checkpointing
 
