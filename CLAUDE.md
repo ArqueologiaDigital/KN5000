@@ -211,6 +211,95 @@ mame kn5000 -rompath /mnt/shared/custom_kn5000_roms/mines \
 
 **Mines game activation:** The game requires DISK MENU activation (event `0x01C00008`). For automated tests, use Lua to write 1 to `GAME_ACTIVE` at address 0x200000 after the firmware has booted (~30s of emulated time).
 
+## Parallel Background Agent Safety (STRICT POLICIES)
+
+These policies govern how background agents operate when multiple agents work concurrently in the same repository. They were established after the March 14, 2026 session where 8 parallel rename agents exposed critical coordination failures.
+
+### Policy 1: No Destructive Git Commands in Background Agents
+
+Background agents MUST NOT run any of the following git commands:
+- `git reset --hard`
+- `git checkout -- .` (whole-tree revert)
+- `git clean -f`
+- `git stash`
+- `git rebase`
+- `git push --force`
+
+If a background agent encounters a dirty working tree or merge conflict, it must **stop and report the problem** rather than attempt cleanup. Only the orchestrating (main) agent or the user may run destructive git commands.
+
+**Incident:** A background agent executed `git reset --hard`, destroying 5 commits by other agents. Recovery required manual `git reflog` intervention.
+
+### Policy 2: Cross-File Reference Verification Before Commit
+
+Every rename operation MUST, before committing:
+1. `grep -r` across ALL maincpu/ files for both the old label name AND the new label name
+2. Verify that every reference to the old name has been updated
+3. Run `make all` (or at minimum the linker step) and confirm 0 undefined symbols
+
+The rename script itself must take a mapping of `{old_name: new_name}` and apply it to ALL files in one pass, not just the target file. Cross-file reference updates are not optional — they are part of the rename operation.
+
+**Incident:** 11 of 122 commits were fixes for broken cross-file references — agents renamed definitions in one file but missed references in other files, causing undefined symbol link errors.
+
+### Policy 3: One Agent Per Git Repository at Commit Time
+
+Background agents working in the same repository MUST coordinate commits through a lock file:
+- Before staging/committing, create a lock file (`/tmp/kn5000_roms_disasm_git.lock`) containing the agent's task ID
+- If the lock file exists and was created by a different agent, wait 10 seconds and retry (up to 6 retries)
+- Hold the lock only during the stage → commit → verify cycle (seconds, not minutes)
+- Remove the lock file after the commit succeeds or after any failure
+- The orchestrating agent is responsible for cleaning stale locks at session start
+
+**Incident:** Multiple agents staging and committing simultaneously created chaotic working tree states — files appearing/disappearing from `git status`, `MM` states from concurrent modifications.
+
+### Policy 4: Atomic Rename Batches (No Partial Commits)
+
+Each rename batch must be fully self-contained:
+- Generate the complete rename mapping before starting any file edits
+- Apply all renames (definition + all cross-file references) in one script execution
+- Build-verify immediately after application
+- Commit immediately after successful build
+- If the script is interrupted (rate limit, timeout), the next invocation must detect partial state: either roll back with `git checkout -- <affected files>` or complete the partial batch
+
+**Incident:** Agent rate limits caused partial rename work to be left uncommitted in the working tree, requiring manual intervention. Some agents produced duplicate commits for the same batch.
+
+### Policy 5: NFS Retry Protocol for Builds
+
+Build verification in agents must use a retry wrapper:
+- Always `sleep 2` between `make clean` and `make all`
+- Retry up to 3 times before reporting failure
+- Never assume a build failure is due to code errors on the first attempt — check for NFS artifacts first (0-byte files, corrupt ELF headers, missing intermediates)
+
+**Incident:** NFS race conditions caused repeated build failures: 0-byte object files, corrupt ELF headers ("section header string table index does not exist"), disappearing intermediate `.bin` files.
+
+### Policy 6: Agent Scope Boundaries (No File Overlap)
+
+Before launching parallel agents, the orchestrating agent must assign non-overlapping file ownership:
+- Each agent "owns" one primary file and may only modify that file + its direct cross-references
+- If two agents need to modify the same cross-reference file, one must complete before the other starts
+- The orchestrating agent maintains a manifest of `{agent_id: [owned_files]}`
+- No agent may modify a file owned by another active agent
+
+**Incident:** Multiple agents modifying the same cross-reference files concurrently caused changes to conflict or be silently overwritten.
+
+### Policy 7: Duplicate Symbol Detection in Rename Scripts
+
+Every rename mapping must be validated before application:
+1. All new names must be unique within the mapping
+2. All new names must not already exist as labels anywhere in the codebase (`grep -r "^new_name:" maincpu/`)
+3. If a collision is detected, append a disambiguating suffix (e.g., `_Inner`, `_Alt`, `_2`) rather than silently creating a duplicate
+
+**Incident:** 4 fix commits were needed for duplicate symbol names — two different `LABEL_XXXXXX` addresses renamed to the same semantic name.
+
+### Policy 8: Agent Progress Checkpointing
+
+Each background agent should write a progress file at batch boundaries:
+- Path: `/tmp/rename_agent_{file}_progress.json`
+- Contents: `{batch: N, labels_done: M, labels_total: T, last_commit: "hash", status: "in_progress|complete|failed"}`
+- The orchestrating agent reads these files instead of polling git
+- On completion or failure, the agent writes final status before exiting
+
+**Incident:** When agents hit rate limits or timeouts, the orchestrating agent had no way to know how far they got without manually inspecting the working tree. Required repeated `git status` and `git log` polling.
+
 ## How to Work From Here
 
 1. **Check the issue tracker.** Run `cd /mnt/shared/kn5000_project && /mnt/shared/tools/bd ready` to see available work, or `bd list` for all issues.
