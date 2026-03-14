@@ -262,14 +262,21 @@ Each rename batch must be fully self-contained:
 
 **Incident:** Agent rate limits caused partial rename work to be left uncommitted in the working tree, requiring manual intervention. Some agents produced duplicate commits for the same batch.
 
-### Policy 5: NFS Retry Protocol for Builds
+### Policy 5: Serialized Builds via Lock File
 
-Build verification in agents must use a retry wrapper:
-- Always `sleep 2` between `make clean` and `make all`
-- Retry up to 3 times before reporting failure
-- Never assume a build failure is due to code errors on the first attempt — check for NFS artifacts first (0-byte files, corrupt ELF headers, missing intermediates)
+The roms-disasm Makefile does not track `.include` dependencies — `make all` without `make clean` silently skips reassembly of modified files. Therefore `make clean && make all` (~12 seconds) is the only valid build verification. Multiple agents running this concurrently causes corrupt intermediate files (one agent's `make clean` deletes another's in-flight `.o`/`.bin` files).
 
-**Incident:** NFS race conditions caused repeated build failures: 0-byte object files, corrupt ELF headers ("section header string table index does not exist"), disappearing intermediate `.bin` files.
+**Rule:** Agents MUST acquire a build lock before running `make clean && make all`:
+- Lock file: `/tmp/kn5000_roms_disasm_build.lock` (separate from the git lock in Policy 3)
+- Before building, create the lock file containing the agent's task ID
+- If the lock file exists and was created by a different agent, wait 10 seconds and retry (up to 12 retries = 2 minutes max wait)
+- Hold the lock for the entire `make clean && make all` cycle (~12 seconds)
+- Remove the lock file after the build completes (success or failure)
+- The orchestrating agent is responsible for cleaning stale locks at session start
+
+**Note:** The filesystem is virtiofs (VM host↔guest), not NFS. The build failures initially attributed to "NFS race conditions" were actually caused by concurrent `make clean` runs deleting each other's intermediate files. The one genuine virtiofs issue (`dd` → `cat` write visibility in the subcpu build step) was fixed with an explicit `sync` in the Makefile (commit `c450bdc`).
+
+**Incident:** 8 parallel agents running `make clean && make all` simultaneously produced corrupt `.o` files ("section header string table index does not exist"), 0-byte intermediate files, and disappearing `.bin` files.
 
 ### Policy 6: Agent Scope Boundaries (No File Overlap)
 
