@@ -87,6 +87,23 @@ All emulator code must describe actual hardware behavior. No HLE shortcuts when 
 
 Agents may build LLVM using `ninja -Cbuild` in the LLVM directory. Reconfigure with `bash build_tlcs900.sh` only if needed. Run specific targets (e.g., `ninja -Cbuild llc`) for faster incremental builds. Run tests with `build/bin/llvm-lit llvm/test/CodeGen/TLCS900/`.
 
+### LLVM Toolchain Provenance Tracking (STRICT POLICY)
+**Source:** Central hub (this file) — applies to `roms-disasm` and `llvm-project`.
+
+**Rule 1: Record LLVM version in every roms-disasm commit.**
+Every commit to `roms-disasm/` must include in its commit message a line:
+`LLVM: <branch>@<short-hash> (<full-hash>)`
+This records the exact LLVM source that the installed toolchain (`llvm-mc`, `ld.lld`, `clang`, `llvm-objcopy`) was built from. Obtain it via:
+`cd /mnt/shared/llvm-project && git log -1 --format="%D @ %h (%H)"`
+
+**Rule 2: Maintain a `TOOLCHAIN_VERSION` file in roms-disasm.**
+The file records the current LLVM build's branch, commit hash, and build date. Update it whenever the LLVM toolchain is rebuilt from a different commit.
+
+**Rule 3: Never rewrite LLVM history after use.**
+Once an LLVM commit has been used to build toolchain binaries that produced verified, committed ROM artifacts, that commit is **immutable**. No `git commit --amend`, no `git rebase`, no `git push --force` that would destroy it. Further LLVM changes must be new commits on top. This ensures any ROM build can be reproduced from the exact compiler source.
+
+**Scope:** All LLVM tools used in the roms-disasm build pipeline: `llvm-mc` (assembler), `ld.lld` (linker), `clang` (C compiler), `llvm-objcopy` (binary extraction).
+
 ### Proactive Unblocking (STRICT POLICY)
 **Source:** Central hub (this file) — applies to ALL subprojects.
 
