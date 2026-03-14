@@ -60,6 +60,25 @@ When firmware understanding improves (new event codes, dispatch behavior, handle
 4. Website deployment (commit + push `docs/`)
 5. Relevant CLAUDE.md files
 
+### Website Symbol Synchronization (STRICT)
+**Source:** Central hub (this file) — applies to `docs/` website.
+
+When labels are renamed in the disassembly source (`roms-disasm/`), ALL references to the old label names on the documentation website (`docs/`) MUST be updated to match. The disassembly ELF symbol tables are the authoritative source of symbol names.
+
+**Procedure:**
+1. Build address→symbol maps from ELF files using `llvm-nm --no-sort` (binary at `/mnt/shared/llvm-project/build/bin/llvm-nm`)
+2. Scan all `.md` files in `docs/` for `LABEL_[0-9A-Fa-f]{6}` patterns (or any other stale label format)
+3. Resolve each label to its current semantic name via address lookup in the ELF symbol tables
+4. Replace all occurrences and commit
+5. Labels that cannot be resolved (e.g., inside raw `.byte` blocks) may remain but should be noted
+
+**When this must be done:**
+- After any label renaming session in `roms-disasm/`
+- As part of the Documentation Freshness checklist above
+- Whenever a `LABEL_XXXXXX` is spotted on a docs page during routine work
+
+**Automation:** The script at `roms-disasm/scripts/sync_docs_labels.py` performs this automatically. Run with `--apply` to modify files. Keep this script updated as the ELF layout evolves.
+
 ### Policy Storage
 **Source:** `roms-disasm/CLAUDE.md`
 
