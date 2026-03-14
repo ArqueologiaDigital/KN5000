@@ -99,13 +99,27 @@ Edit MAME driver files in `/mnt/shared/mame/src/mame/matsushita/`. Do not create
 ### LABEL_XXXXXX Elimination (STRICT POLICY — MAJOR PROJECT GOAL)
 **Source:** Central hub (this file) — applies to `roms-disasm`.
 
-All `LABEL_XXXXXX` address-based labels in the ROM disassembly MUST be replaced with meaningful semantic names. This is a major project goal. Currently ~7,987 remain.
+All `LABEL_XXXXXX` address-based labels in the ROM disassembly MUST be replaced with meaningful semantic names. **STATUS: COMPLETE** (March 2026 — 0 remaining across all ROMs).
 
-**Opportunistic renaming (MANDATORY):** Whenever you are working on any routine or file that contains `LABEL_XXXXXX` labels — for any reason (bug fix, analysis, documentation, other renames) — you MUST take the opportunity to rename them. Do not leave `LABEL_XXXXXX` labels in code you have read and understood. Every touch point is a chance to make progress.
+**Maintenance (MANDATORY):** If new labels are introduced during future work, they MUST be given semantic names immediately. No `LABEL_XXXXXX` may ever be committed.
 
-**Naming quality:** Every label must reflect what the code actually does. Analyze control flow, register usage, callers, callees, and memory access patterns. Generic or placeholder names are not acceptable. See Policy 7 (Duplicate Symbol Detection) for disambiguation rules.
+### Raw Byte Code Elimination (STRICT POLICY — CURRENT MAJOR PROJECT GOAL)
+**Source:** Central hub (this file) — applies to `roms-disasm/` and `llvm/`.
 
-**Verification:** Every rename batch must pass `make clean && make all` with 100% byte match on all 6 ROMs before committing.
+**No executable code may remain as raw `.byte` sequences.** Everything identified as code MUST be disassembled into native TLCS-900 instructions. This is the current major project goal.
+
+**What counts as "code":** Any `.byte` sequence that the CPU executes — instruction encodings, even if LLVM doesn't yet support them. Data tables, strings, bitmaps, and padding are NOT code and may remain as `.byte`/`.ascii`/`.zero`/`.fill`/binary includes.
+
+**Root causes for remaining `.byte` code:** Missing LLVM backend support for certain addressing modes or instruction variants. Each `.byte` code block requires either (a) adding the encoding to the LLVM TLCS-900 backend, or (b) confirming it is actually data, not code.
+
+**Approach:**
+1. Audit all `.byte` sequences in each ROM to identify which are code vs. data
+2. Group code `.byte` sequences by the missing LLVM encoding they need
+3. Implement the missing encodings in the LLVM backend (with tests)
+4. Convert `.byte` code to native instructions in the disassembly
+5. Verify 100% byte match after each conversion batch
+
+**Verification:** Every conversion must pass `make clean && make all` with 100% byte match on all 6 ROMs before committing.
 
 ### Accurate Hardware Emulation
 **Source:** `roms-disasm/CLAUDE.md`
