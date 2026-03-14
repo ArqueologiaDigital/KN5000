@@ -297,7 +297,7 @@ Every rename mapping must be validated before application:
    - Two routines both doing "read param" but from different sources → `SeqData_ReadParamFromBuffer` / `SeqData_ReadParamFromDRAM`
    - Two entry points into the same logical operation → `FlashWrite_Start` / `FlashWrite_Resume`
    - A function and its inlined variant → `VoiceScan_Loop` / `VoiceScan_Unrolled`
-4. If the semantic difference is genuinely unclear after analysis, leave the colliding label as `LABEL_XXXXXX` rather than assigning a misleading name. A raw address label is better than a wrong semantic name.
+4. Do NOT leave any label as `LABEL_XXXXXX`. If the semantic difference is not immediately obvious, invest additional effort: read the surrounding code more carefully, trace callers and callees, examine register usage, check what memory addresses are accessed, and compare the two routines side by side. There is always a meaningful difference — find it and express it in the name.
 
 **Incident:** 4 fix commits were needed for duplicate symbol names — two different `LABEL_XXXXXX` addresses renamed to the same semantic name (`SeqData_ReadParamReturn`, `AudioCtrl_Epilogue`, `SeqScan_ProcessAllParts`).
 
