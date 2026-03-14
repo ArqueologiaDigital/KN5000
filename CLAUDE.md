@@ -77,6 +77,17 @@ Edit MAME driver files in `/mnt/shared/mame/src/mame/matsushita/`. Do not create
 - Use `logmacro.h` with categorized `LOGMASKED()` channels instead of raw `logerror()`.
 - Follow existing MAME coding conventions visible in surrounding code.
 
+### LABEL_XXXXXX Elimination (STRICT POLICY — MAJOR PROJECT GOAL)
+**Source:** Central hub (this file) — applies to `roms-disasm`.
+
+All `LABEL_XXXXXX` address-based labels in the ROM disassembly MUST be replaced with meaningful semantic names. This is a major project goal. Currently ~7,987 remain.
+
+**Opportunistic renaming (MANDATORY):** Whenever you are working on any routine or file that contains `LABEL_XXXXXX` labels — for any reason (bug fix, analysis, documentation, other renames) — you MUST take the opportunity to rename them. Do not leave `LABEL_XXXXXX` labels in code you have read and understood. Every touch point is a chance to make progress.
+
+**Naming quality:** Every label must reflect what the code actually does. Analyze control flow, register usage, callers, callees, and memory access patterns. Generic or placeholder names are not acceptable. See Policy 7 (Duplicate Symbol Detection) for disambiguation rules.
+
+**Verification:** Every rename batch must pass `make clean && make all` with 100% byte match on all 6 ROMs before committing.
+
 ### Accurate Hardware Emulation
 **Source:** `roms-disasm/CLAUDE.md`
 
