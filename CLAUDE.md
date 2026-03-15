@@ -121,6 +121,26 @@ All `LABEL_XXXXXX` address-based labels in the ROM disassembly MUST be replaced 
 
 **Verification:** Every conversion must pass `make clean && make all` with 100% byte match on all 6 ROMs before committing.
 
+### Symbolic Pointer Resolution (STRICT POLICY)
+**Source:** Central hub (this file) — applies to `roms-disasm/`, specifically NAKA widget C files and any other C data files compiled into the ROM.
+
+**No numeric pointer literals may remain when the address resolves to a known symbol.** Every `uint32_t` pointer field in C struct data that holds a ROM address MUST be replaced with a `NAKA_ADDR(symbol)` reference (or equivalent), with the symbol resolved through the linker script.
+
+**Procedure:**
+1. Look up every hex pointer value in the ELF symbol table (`llvm-nm --no-sort` on the built ELF)
+2. If the address matches a known symbol, declare it `extern const char symbol;` in the C file
+3. Define `symbol = 0x00XXXXXX;` in the corresponding `_link.ld` linker script
+4. Replace the hex literal with `NAKA_ADDR(symbol)` in the struct initializer
+5. Pointers that are genuinely zero (NULL) or point to addresses with no symbol may remain numeric
+
+**When this must be done:**
+- When creating or converting any NAKA widget C file
+- When improving an existing C data file (raw byte array → struct conversion)
+- When any new pointer field is added or discovered in existing struct files
+- Proactively: scan existing C files for remaining hex pointer literals and resolve them
+
+**Rationale:** Symbolic pointers make cross-references visible and searchable. A hex literal like `0x00F2E490` is opaque; `NAKA_ADDR(IvRealRecExitProc)` immediately shows what handler the widget calls. This also enables automated consistency checking — if a symbol is renamed, the linker will error instead of silently producing wrong addresses.
+
 ### Accurate Hardware Emulation
 **Source:** `roms-disasm/CLAUDE.md`
 
