@@ -141,6 +141,31 @@ All `LABEL_XXXXXX` address-based labels in the ROM disassembly MUST be replaced 
 
 **Rationale:** Symbolic pointers make cross-references visible and searchable. A hex literal like `0x00F2E490` is opaque; `NAKA_ADDR(IvRealRecExitProc)` immediately shows what handler the widget calls. This also enables automated consistency checking — if a symbol is renamed, the linker will error instead of silently producing wrong addresses.
 
+### Raw Byte Array Elimination in C Data Files (STRICT POLICY)
+**Source:** Central hub (this file) — applies to `roms-disasm/`, specifically NAKA widget C files and any other C data files compiled into the ROM.
+
+**No C data file may remain as a raw `unsigned char data[N] = { 0xNN, ... }` byte array when the data has known structure.** All structured data MUST be converted to proper C structs with named fields, typed members, and meaningful initializers.
+
+**What must be done:**
+1. Analyze the binary data to identify widget headers, field boundaries, pointer values, and trailing string data
+2. Define appropriate packed struct types (reuse existing types from `naka_types.h` where possible, define new local types for novel structures)
+3. Replace raw hex bytes with named field initializers (`.field_name = value`)
+4. Use `NAKA_HDR()` for widget headers, `SELF()` for self-referential pointers, `NAKA_ADDR()` for external pointers (per Symbolic Pointer Resolution policy)
+5. Convert trailing string data to `ALIGNED_STRING()` or bare string literals instead of hex character codes
+6. Add `_Static_assert(sizeof(...) == N)` to guarantee the struct matches the expected binary size
+7. Verify 100% byte match after conversion
+
+**When this must be done:**
+- When any new NAKA widget C file is created (never generate raw byte arrays if structure is known)
+- When touching or reviewing an existing raw byte array C file — convert it before or as part of the work
+- Proactively: existing raw byte array files should be converted to structs whenever an agent has capacity
+
+**Raw byte arrays are acceptable ONLY when:**
+- The data structure is genuinely unknown and cannot be determined from analysis
+- The data is truly unstructured (e.g., bitmap pixel data, opaque firmware blobs)
+
+**Rationale:** `{ 0x31, 0x00, 0x60, 0x01, 0x20, 0x00, ... }` is unreadable. `.w0 = { .header = NAKA_HDR(NAKA_TYPE_GROUP), .field_04 = 0x0020, ... }` immediately reveals the widget type, field semantics, and cross-references. Structured C files enable grep-based analysis, catch size mismatches at compile time, and make the NAKA widget system comprehensible.
+
 ### Accurate Hardware Emulation
 **Source:** `roms-disasm/CLAUDE.md`
 
