@@ -79,6 +79,30 @@ When labels are renamed in the disassembly source (`roms-disasm/`), ALL referenc
 
 **Automation:** The script at `roms-disasm/scripts/sync_docs_labels.py` performs this automatically. Run with `--apply` to modify files. Keep this script updated as the ELF layout evolves.
 
+### No Trivial .incbin Wrapper Files (STRICT POLICY)
+**Source:** Central hub (this file) — applies to `roms-disasm/`.
+
+When a C data file is compiled to a `.bin` and included via `.incbin`, place the label and `.incbin` directive **directly in the source file where it belongs** (e.g., `kn5000_v10_program.s`). Do NOT create a separate `.s` wrapper file that contains only a label and `.incbin` — that is unnecessary indirection.
+
+**Exception:** A wrapper `.s` file IS justified when it contains additional content beyond the label + `.incbin`, such as `.equ` offset aliases for sub-labels within the binary blob.
+
+**Example (correct):**
+```asm
+; In kn5000_v10_program.s:
+Voice_FactoryPresetData:
+	.incbin "includes/generated/voice_factory_presets.bin"
+```
+
+**Example (wrong — do NOT do this):**
+```asm
+; voice_factory_presets.s (unnecessary wrapper file):
+Voice_FactoryPresetData:
+	.incbin "includes/generated/voice_factory_presets.bin"
+
+; Then in kn5000_v10_program.s:
+	.include "audio/voice_factory_presets.s"  ; pointless indirection
+```
+
 ### Policy Storage
 **Source:** `roms-disasm/CLAUDE.md`
 
