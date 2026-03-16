@@ -79,6 +79,21 @@ When labels are renamed in the disassembly source (`roms-disasm/`), ALL referenc
 
 **Automation:** The script at `roms-disasm/scripts/sync_docs_labels.py` performs this automatically. Run with `--apply` to modify files. Keep this script updated as the ELF layout evolves.
 
+### Assembly .include Indentation (STRICT POLICY)
+**Source:** Central hub (this file) — applies to `roms-disasm/`.
+
+All `.include` directives in assembly files MUST be tab-indented. Never place `.include` at column 0.
+
+```asm
+; CORRECT:
+	.include "midi/sysex_routines.s"
+	.include "ui/ui_control_panel.s"
+
+; WRONG — inconsistent indentation:
+    .include "midi/sysex_routines.s"
+.include "ui/ui_control_panel.s"
+```
+
 ### No Trivial .incbin Wrapper Files (STRICT POLICY)
 **Source:** Central hub (this file) — applies to `roms-disasm/`.
 
