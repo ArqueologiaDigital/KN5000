@@ -48,7 +48,7 @@ Do NOT include "Co-Authored-By: Claude" in commits on `kn5000_pr*` branches (des
 ### Assembly Edit Verification
 **Source:** `roms-disasm/CLAUDE.md`
 
-Every assembly edit must be verified: (1) ROMs still build, (2) byte-matching score does not degrade (`python scripts/compare_roms.py`). Never commit assembly changes without both checks passing.
+Every assembly edit must be verified: (1) ROMs still build, (2) byte-matching score does not degrade (`python scripts/build/compare_roms.py`). Never commit assembly changes without both checks passing.
 
 ### Documentation Freshness
 **Source:** `mines/CLAUDE.md`, `roms-disasm/CLAUDE.md`
@@ -77,7 +77,7 @@ When labels are renamed in the disassembly source (`roms-disasm/`), ALL referenc
 - As part of the Documentation Freshness checklist above
 - Whenever a `LABEL_XXXXXX` is spotted on a docs page during routine work
 
-**Automation:** The script at `roms-disasm/scripts/sync_docs_labels.py` performs this automatically. Run with `--apply` to modify files. Keep this script updated as the ELF layout evolves.
+**Automation:** The script at `roms-disasm/scripts/analysis/sync_docs_labels.py` performs this automatically. Run with `--apply` to modify files. Keep this script updated as the ELF layout evolves.
 
 ### Assembly .include Indentation (STRICT POLICY)
 **Source:** Central hub (this file) — applies to `roms-disasm/`.
