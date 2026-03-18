@@ -135,6 +135,51 @@ Edit MAME driver files in `/mnt/shared/mame/src/mame/matsushita/`. Do not create
 - Use `logmacro.h` with categorized `LOGMASKED()` channels instead of raw `logerror()`.
 - Follow existing MAME coding conventions visible in surrounding code.
 
+### MAME Branch Management (STRICT POLICY)
+**Source:** Central hub (this file) — applies to `mame/`.
+
+All MAME development MUST follow this branching discipline to separate curated PR-ready work from speculative research.
+
+**Branch types:**
+
+| Pattern | Purpose | AI Attribution | Quality |
+|---------|---------|---------------|---------|
+| `kn5000_prN_<topic>` | PR-ready branches for upstream submission | NO | Clean commits, reviewed, no regressions |
+| `kn5000_research_<topic>` | Research/experimental branches | YES | WIP/messy OK, never submitted as PRs |
+| `ARCHIVED_<name>` | Superseded branches (kept for reference) | N/A | Read-only, not for active development |
+
+**Rules:**
+1. **PR branches are created fresh from `upstream/master`** with cherry-picked or rewritten commits only. Never evolve a research branch into a PR branch.
+2. **Research branches NEVER get pushed as PRs.** When research produces a confirmed fix, rewrite it as a clean commit on a fresh PR branch.
+3. **One topic per PR branch.** Each PR should address a single coherent feature or fix.
+4. **No speculative changes on PR branches.** Every commit must be a known-correct improvement that doesn't regress existing behavior.
+5. **Research branches are disposable.** They can have WIP commits, reverts, iterations. They exist to explore and learn, not to ship.
+6. **Test before and after.** When creating a PR branch, verify the splash screen animation, control panel, and basic boot sequence work both before and after each commit.
+7. **Prefix old branches with `ARCHIVED_`** when they are superseded by a newer clean branch.
+
+**Workflow:**
+```
+upstream/master (mamedev/mame)
+  │
+  ├── kn5000_prN_<topic>          — PR-ready (clean, minimal, one topic)
+  │     • Rebased on upstream/master
+  │     • No AI attribution
+  │     • Each commit self-contained and reviewable
+  │
+  ├── kn5000_research_<topic>     — Research/experimental
+  │     • Branched from latest PR branch or upstream/master
+  │     • AI attribution allowed
+  │     • Messy commits OK (WIP, revert, iterate)
+  │     • When research confirms a fix → rewrite on PR branch
+  │
+  └── ARCHIVED_<old_branch>       — Superseded (reference only)
+```
+
+**Current active branches (March 2026):**
+- `kn5000_pr5_driver_v2` — PR branch: timer fix + driver rework (control panel HLE, subcpu payload, keybed)
+- `kn5000_research_ssf` — (to be created) SSF presentation investigation
+- `kn5000_research_tonegen` — (to be created) Tone generator and sound subsystem research
+
 ### LABEL_XXXXXX Elimination (STRICT POLICY — MAJOR PROJECT GOAL)
 **Source:** Central hub (this file) — applies to `roms-disasm`.
 
