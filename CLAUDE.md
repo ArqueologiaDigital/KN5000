@@ -118,6 +118,18 @@ Voice_FactoryPresetData:
 	.include "audio/voice_factory_presets.s"  ; pointless indirection
 ```
 
+### Maximum .incbin Size (STRICT POLICY)
+**Source:** Central hub (this file) — applies to `roms-disasm/`.
+
+**No `.incbin` directive may include a binary file larger than 158,788 bytes** (the current largest `.incbin` in the v9/v10 source: `naka_widget_tables_2.bin`). Any binary larger than this limit MUST be split into smaller semantic units, disassembled into native instructions, or decoded as structured data (C structs, `.byte`/`.long` tables with symbolic labels).
+
+**Rationale:** Large binary blobs hide code structure, defeat cross-version diffing, and prevent reverse engineering. The 158,788-byte limit reflects the practical maximum for a single NAKA widget data table compiled from C source. Code sections must NEVER be binary blobs — they must always be disassembled instructions with symbolic labels.
+
+**When this applies:**
+- When creating source trees for new firmware versions
+- When adding data includes to any ROM source
+- Binary blobs used as temporary stepping stones must be tracked as issues and eliminated
+
 ### Policy Storage
 **Source:** `roms-disasm/CLAUDE.md`
 
